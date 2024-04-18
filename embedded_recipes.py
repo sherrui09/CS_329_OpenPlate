@@ -15,6 +15,7 @@ def select_recipes(recipes: DataFrame, n: int, random_selection: bool) -> DataFr
   return selected_recipes
 
 def make_recipe_keywords(sample_recipes: DataFrame) -> list:
+  start = time.time()
   keybert_model = KeyBERT() # dont repeat instances
   recipe_keywords = []
 
@@ -24,6 +25,9 @@ def make_recipe_keywords(sample_recipes: DataFrame) -> list:
     title_and_summary = title + " " + summary
     recipe_keywords.append(keybert_model.extract_keywords(title_and_summary))
   
+  end = time.time()
+  print(f'Time to Embed {len(sample_recipes)} Recipes: {(end - start) / 60} minutes')
+
   return recipe_keywords
 
 def convert_list_to_csv(data_list: list, file_path: str):
@@ -33,7 +37,7 @@ def convert_list_to_csv(data_list: list, file_path: str):
     writer.writerows(data_list)
   
 
-recipe_count = 100
+recipe_count = 35500
 random_selection = False
 
 ALL_RECIPES = pd.read_csv('C:/Users/cheem/Documents/GitHub/CS_329_OpenPlate/dat/all_recipes_scraped.csv') # make path name your own.

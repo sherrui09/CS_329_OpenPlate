@@ -11,7 +11,7 @@ from embedded_recipes import SAMPLE_RECIPES
 # encode RECIPES with BERT it takes hella long, can I like
 def return_top_recipes(calories_per_meal: int, taste_profile: str, dietary_restriction: str, n_recipes: int):
     
-    caloric_multiplier = 1 # alter value...
+    caloric_multiplier = 1 # alter value... (should be > 1)
     caloric_deviation = calories_per_meal * caloric_multiplier
     min_calories_per_meal, max_calories_per_meal = calories_per_meal - caloric_deviation, calories_per_meal + caloric_deviation
     # null_calories_count = RECIPES['calories'].isnull().sum()
@@ -59,7 +59,7 @@ RECIPE_KEYWORDS = []
 
 def main():
     calories_per_meal = 800
-    taste_profile = "I want a dish that is Asian and has beef, vegetables, and rice"
+    taste_profile = "spaghetti and turkey meatballs with garlic bread"
     dietary_restriction = ""
     n_recipes = 5
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
@@ -77,7 +77,7 @@ def main():
     end = time.time()
     print(f'Time to make RECIPE_KEYWORDS: {end - start}')
     top_n_recipes = return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    # print(top_n_recipes['name'])
+    print(top_n_recipes)
 
 # This block checks if the script is being run directly, not imported as a module
 if __name__ == "__main__":
