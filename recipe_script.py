@@ -43,7 +43,7 @@ def return_top_recipes(calories_per_meal: int, taste_profile: str, dietary_restr
           score += fuzz.partial_ratio(key_word, recipe_words) / denom
         similarity_scores.append((index, score))
     end = time.time()
-    print(f'Fuzzy Algorithm Time: {end - start}')
+    print(f'Fuzzy Algorithm Time: {round(end - start, 3)} seconds')
     
     similarity_scores.sort(key=lambda x: x[1], reverse=True) # sort by highest mean
     top_indices = [index for index, _ in similarity_scores]
@@ -63,7 +63,7 @@ def main():
     dietary_restriction = ""
     n_recipes = 5
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = 'C:/Users/cheem/Documents/GitHub/CS_329_OpenPlate/embedded_recipes.csv'
+    file_path = 'C:/Users/cheem/Documents/GitHub/CS_329_OpenPlate/dat/embedded_recipes.csv'
 
     start = time.time()
     with open(file_path, 'r', newline='') as csvfile:
@@ -75,9 +75,9 @@ def main():
                 keywords.append(word)
             RECIPE_KEYWORDS.append(keywords)
     end = time.time()
-    print(f'Time to make RECIPE_KEYWORDS: {end - start}')
+    print(f'Time to make RECIPE_KEYWORDS: {round(end - start, 3)} seconds')
     top_n_recipes = return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    print(top_n_recipes)
+    # print(top_n_recipes)
 
 # This block checks if the script is being run directly, not imported as a module
 if __name__ == "__main__":
