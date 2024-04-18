@@ -141,3 +141,6 @@ body.show-chatbot .chatbot {
   visibility: hidden;
   font-size: 1.35rem;
 }
+.chat-input textarea:valid ~ span {
+    visibility: visible;
+  }
