@@ -2,15 +2,20 @@ from flask import Flask, request, jsonify, render_template, session
 import openai
 from openai import OpenAI
 import re
+from pandas import DataFrame # type: ignore
+from keybert import KeyBERT # type: ignore
+import time
+from fuzzywuzzy import fuzz # type: ignore
+import csv
+from embedded_recipes import SAMPLE_RECIPES
 
 app = Flask(__name__)
+app.secret_key = 'your_very_secret_key'
 
-api_key = ''
+api_key = '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'
 client = OpenAI(
     api_key=api_key,
 )
-
-
 dietary_restrictions = {
     1: "None",
     2: "Keto",
@@ -105,7 +110,7 @@ def generate_calorie(prompt):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful calorie assistant to help users calculate their daily intake based on their profile. Please give an estimation if there is not enough information."
+                    "content": "You are a helpful calorie assistant to help users calculate an achievable daily caloric amount based on their profile and goals. Please give an estimation if there is not enough information."
                 },
                 {
                     "role": "user",
@@ -117,7 +122,7 @@ def generate_calorie(prompt):
     except Exception as e:
         return str(e)
 
-# Calculate daily maintenance calories
+# Calculate daily maintanennce calories
 
 def generate_recipe(prompt):
     try:
@@ -155,15 +160,7 @@ class HealthProfileAssistant:
             "dietary_restriction": "Do you have any dietary restrictions? (e.g., vegan, keto)",
             "goal": "What's your goal? (e.g., weight loss, maintenance, muscle gain)"
         }
-        self.question_order = [
-            "height", "weight", "gender", "dietary_restriction", "goal"
-        ]
-        self.question_keys = list(self.user_profile.keys())  # Maintain order of questions
-        self.current_question_index = 0  # Track which question to ask next
 
-    def is_complete(self):
-        return all(value is not None for value in self.user_profile.values())
-    
     def validate_and_process_response(self, topic, response):
         if topic == "dietary_restriction":
             prompt = f"""
@@ -187,6 +184,7 @@ class HealthProfileAssistant:
                 prompt = f"From this response '{response}', can we tell what the user's {topic} is? Please answer Yes or No, and if Yes, provide the user's {topic}."
 
             ai_response = generate(prompt)
+            #print(ai_response)
 
             if "no" in ai_response.lower().split() and topic != "dietary_restriction":
                 prompt = (
@@ -235,7 +233,9 @@ class HealthProfileAssistant:
             "male": "Male",
         }.items() if key in word), "Prefer not to specify")
 
-    
+
+    def is_complete(self):
+        return all(value is not None for value in self.user_profile.values())
 
 def specify_updates(updates, field_name):
         prompt = f"The user wants to make the following changes to their health profile '{updates}', write a conversational question asking them to give specifics about their changes to their {field_name}. Only reply with the question and only ask about their {field_name}."
@@ -254,7 +254,7 @@ class UpdateAssistant:
 
     def check_for_update_intent(self, user_input):
           prompt = (
-              f"Based on the user's response {user_input} to if they'd like to update their profile or build a recipe. Classify it into: 1. Update profile, 2. Generate Recipe 3. Other. Please return just the number associated, return 1 if they want to update profile and generate recipe."
+              f"The user responded to if they'd like to update their profile or build a recipe with the following: {user_input}. Classify it into: 1. Update profile, 2. Generate Recipe 3. Other. Please return just the number associated, return 1 if they want to update profile and generate recipe."
           )
           response = generate(prompt)
           int_intent = lambda s: int(re.search(r'\d', s).group(0)) if re.search(r'\d', s) else None
@@ -306,6 +306,19 @@ class UpdateAssistant:
             response = generate_update(prompt)
         return response
 
+    def extract_cal(self, s):
+        numbers = re.findall(r'\d+', s)
+        if numbers:
+            number = int(numbers[0])
+            if number < 1200:
+                return 1200
+            elif number > 3000:
+                return 3000
+            else:
+                return number
+        else:
+            return 2000
+
 
     def calculate_calories(self):
         height = self.user_profile["height"]
@@ -323,9 +336,18 @@ class UpdateAssistant:
         prompt = (
             f"Based on the following analysis{response}, list the user's recommended daily intake as a whole number, do not include any units or extra text."
         )
-        return generate_calorie(prompt)
+        string_cal = generate_calorie(prompt)
 
-class RecipeAssistant:
+        return self.extract_cal(string_cal)
+
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+class RecipeAssistant(metaclass=Singleton):
     def __init__(self, user_profile, recipe_description):
         self.client = client
         self.messages = [
@@ -349,7 +371,7 @@ class RecipeAssistant:
 
         return response_content
 
-class GeneralAssistant:
+class GeneralAssistant(metaclass=Singleton):
     def __init__(self, user_profile):
         self.client = client
         self.messages = [
@@ -372,40 +394,225 @@ class GeneralAssistant:
         self.messages.append({"role": "assistant", "content": response_content})
 
         return response_content
+        
+def validate_recipe(recipe, dietary_restriction, taste):
+    if check_recipe_fields:
+        name = recipe[0]["name"]
+        ingredients = recipe[0]["ingredients"]
+        directions = recipe[0]["directions"]
+        url = recipe[0]["url"]
+        prep = recipe[0]["prep"]
+        cook = recipe[0]["cook"]
+        servings = recipe[0]["servings"]
+        calories = recipe[0]["calories"]
+        recipe_description = f"Recipe name: {name}, Ingredients: {ingredients}, Directions: {directions}, Calories: {calories}, Prep time: {prep}, Cook time: {cook}. URL: {url}"
+        prompt = prompt = f"Given the user's dietary preference of {dietary_restriction} with a taste profile for {taste}, does the following recipe description fit their dietary preference and somewhat match their taste profile? Here's the recipe: {recipe_description}. Return 1 for Yes, 2 for No."
+        recipe_check = generate(prompt)
+        int_recipe_check = lambda s: int(re.search(r'\d', s).group(0)) if re.search(r'\d', s) else None
+        print(int_recipe_check)
+        print(int_recipe_check(recipe_check) == 1)
+        return int_recipe_check(recipe_check) == 1, recipe_description
+    return False, recipe
 
 
-@app.route("/")
+def return_top_recipes(calories_per_meal: int, taste_profile: str, dietary_restriction: str, n_recipes: int, RECIPE_KEYWORDS):
+
+    caloric_multiplier = 0.7 # alter value... (should be < 1)
+    caloric_deviation = calories_per_meal * caloric_multiplier
+    min_calories_per_meal, max_calories_per_meal = calories_per_meal - caloric_deviation, calories_per_meal + caloric_deviation
+    # null_calories_count = RECIPES['calories'].isnull().sum()
+
+    selected_recipes_df = SAMPLE_RECIPES[(SAMPLE_RECIPES['calories'] >= min_calories_per_meal) & (SAMPLE_RECIPES['calories'] <= max_calories_per_meal)]
+    selected_recipes_df.reset_index(drop=True, inplace=True)
+
+    if dietary_restriction != "":
+        for index, recipe in selected_recipes_df.iterrows():
+            recipe_info = recipe['summary'] + ' ' + recipe['name']
+            if dietary_restriction in recipe_info:
+              print(recipe_info) # implement l8r
+
+    if len(selected_recipes_df) < n_recipes:
+        raise ValueError(f'There are not n_recipes in selected_recipes_df. Choose value lower than {len(selected_recipes_df)}')
+
+    print(f'# of Selected Recipes: {len(selected_recipes_df)}')
+    similarity_scores = []
+    taste_keywords = KeyBERT().extract_keywords(taste_profile)
+    key_words  = [word for word, _ in taste_keywords]
+
+    start = time.time()
+    for index in range(len(RECIPE_KEYWORDS)):
+      recipe_words = RECIPE_KEYWORDS[index]
+      denom = len(key_words)
+      if denom != 0: # avoid div by 0
+        score = 0
+        for key_word in key_words:
+          score += fuzz.partial_ratio(key_word, recipe_words) / denom
+        similarity_scores.append((index, score))
+    end = time.time()
+    print(f'Fuzzy Algorithm Time: {round(end - start, 3)} seconds')
+
+    similarity_scores.sort(key=lambda x: x[1], reverse=True) # sort by highest mean
+    top_indices = [index for index, _ in similarity_scores]
+    top_n_indices = top_indices[:n_recipes]
+
+    top_recipes = [SAMPLE_RECIPES.iloc[index] for index in top_n_indices]
+    top_recipes_name = [SAMPLE_RECIPES['name'][index] for index in top_n_indices]
+    print(top_recipes_name)
+
+    return top_recipes
+
+
+def check_recipe_fields(recipe):
+    # Check if recipe list is empty or not
+    if not recipe:
+        return False
+
+    # Explicitly check each key
+    required_keys = ["name", "ingredients", "directions", "url", "prep", "cook", "servings", "calories"]
+    for key in required_keys:
+        if key not in recipe[0]:
+            return False
+
+    return True
+
+def get_recipe(calories_per_meal, taste_profile):
+    RECIPE_KEYWORDS = []
+    n_recipes = 1
+    dietary_restriction = ''
+    # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
+    file_path = 'C:/Users/sherry/open_plate/app/embedded_recipes.csv'
+
+    with open(file_path, 'r', newline='', encoding='latin1') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            keywords = []
+            for entry in row:
+                word = entry.split(",")[0].strip("()\'")
+                keywords.append(word)
+            RECIPE_KEYWORDS.append(keywords)
+
+    return return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes, RECIPE_KEYWORDS)
+
+assistant = HealthProfileAssistant()
+update_agent = None
+general_assistant = None
+int_intent = None
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template("index.html")
+    if request.method == 'GET':
+        session['profile_updated'] = False
+        session['update_profile'] = False
+        session['calories_generated'] = False
+        session['recipe_generated'] = False
+        session['ready_for_agent'] = False
+        session['calories'] = 1600
+        welcome_message = "Welcome to the Meal Planner Assistant. I'll ask you a few questions to understand your preferences and needs."
+        # Start from the first question
+        session['current_question_key'] = next(iter(assistant.questions)) if assistant.questions else None
+        session['user_profile'] = {key: None for key in assistant.questions}  # Initialize user profile
+        return render_template('index.html', bot_response=f"{welcome_message} {assistant.questions[session['current_question_key']]}")
 
-@app.route("/start", methods=["GET"])
-def start():
-    global assistant
-    assistant = HealthProfileAssistant()
-    message = "Welcome to the Meal Planner Assistant. I'll ask you a few questions to understand your preferences and needs."
-    return jsonify(message=message, question=assistant.questions['height'])
-
-
-@app.route("/message", methods=["POST"])
-def message():
-    user_input = request.json['message']
-    current_key = assistant.question_keys[assistant.current_question_index]
-    if assistant.user_profile[current_key] is None:
-        valid_response, processed_response = assistant.validate_and_process_response(current_key, user_input)
-        if valid_response:
-            assistant.user_profile[current_key] = processed_response
-            assistant.current_question_index += 1  # Move to the next question
-            if assistant.current_question_index >= len(assistant.question_keys):
-                summary = "Thank you for providing your information. Here's your profile:\n" + str(assistant.user_profile)
-                return jsonify(message=summary)
+        
+    if request.method == 'POST':
+        data = request.get_json()  
+        user_input = data['message'].strip()
+        
+        current_key = session['current_question_key']
+        
+        if current_key is not None:
+            valid_response, processed_response = assistant.validate_and_process_response(current_key, user_input)
+            if valid_response:
+                session['user_profile'][current_key] = processed_response
+                print(session['user_profile'][current_key])
+                # Determine the next question
+                remaining_keys = [k for k in assistant.questions if session['user_profile'][k] is None]
+                print(remaining_keys)
+                if remaining_keys:
+                    session['current_question_key'] = remaining_keys[0]
+                    print(session['current_question_key'])
+                    return jsonify(f"{assistant.questions[session['current_question_key']]}")
+                else:
+                    # All questions answered
+                    session['current_question_key'] = None
+                    return jsonify(f"Thank you for providing your information. Here's your profile: {session['user_profile']}\n Let me know if you'd like to update your profile or jump into generating your recipe!")
             else:
-                next_question = assistant.questions[assistant.question_keys[assistant.current_question_index]]
-                return jsonify(message=next_question)
-        else:
-            return jsonify(message=f"Invalid response for {current_key}. Please try again.\n{assistant.questions[current_key]}")
-    return jsonify(message="All questions answered. Thank you!")
+                print(assistant.questions[current_key])
+                return jsonify(f"Invalid response for {current_key}. Please try again.")
+        
+        if not session['profile_updated']:
+            update_agent = UpdateAssistant(session['user_profile'])
+            int_intent = update_agent.check_for_update_intent(user_input) 
+            print(int_intent)                 
+            if int_intent == 1:
+                session['update_profile'] = True
+                return jsonify("What are the changes to your health profile?")
+            
+            if session['update_profile']:
+                fields_to_update = update_agent.extract_fields_to_update(update_agent.identify_fields_to_update(user_input))
+                for field_index in fields_to_update:
+                    if field_index == 0:
+                        continue
+                    field_name = update_agent.field_names[field_index - 1]
+                    prompt = f"From the user's response about their change in health profile '{user_input}', do we have specific information to update their {field_name}? Simply say yes if we do, otherwise just say No"
+                    response = generate_update(prompt)
+                    if "no" in response.lower():
+                        ### NEED TO REFINE
+                        return render_template('index.html', bot_response=f"Please specify the update for {field_name}")
+                    else:
+                        update_agent.user_profile[field_name] = update_agent.process_updates(user_input)
+                session['user_profile'] = update_agent.user_profile
+                session.pop('update_profile', None)
+                session['profile_updated'] = True
+                session["calories"] = update_agent.calculate_calories()
+                if session["calories"] < 1200:
+                    session["calories"] = 1200
+                session['calories_generated'] = True
+                return jsonify(f"Thank you for providing the information. Here's your new profile: {update_agent.user_profile}Your recommended daily calories is {calories}. Let's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
 
+        if not session['calories_generated'] and (int_intent == 1 or int_intent == 2):
+            # Calculate calories and get recipe
+            session["calories"] = update_agent.calculate_calories()
+            print(session["calories"])
+            if session["calories"] < 1200: session["calories"] = 1200
+            session['calories_generated'] = True
+            return jsonify(f"Your recommended daily calories is {session['calories']}. Let's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
+        # Handle recipe preferences
+        if not session['recipe_generated']:
+            prompt = f"Given the user's preferences described as: {user_input}, summarize these preferences into a concise statement suitable for NLP processing."
+            meal_calories = int(session["calories"] / 3)
+            user_preference = generate_recipe(prompt)
+            recipe = get_recipe(meal_calories, user_preference)
+            dietary_restriction = session['user_profile']["dietary_restriction"]
+            valid_recipe, session['recipe_description'] = validate_recipe(recipe, dietary_restriction, user_preference)
+            if valid_recipe:
+                session['recipe_generated'] = True
+                return jsonify(f"{session['recipe_description']}. Let me know if you have any questions!")
+            else:
+                prompt = f"Given the user profile {session['user_profile']}, and their preference for meals {user_preference}, generate a recipe for them that is around {session['calories']} calories"
+                session['recipe_description'] = generate_recipe(prompt)
+                session['recipe_generated'] = True
+                return jsonify(f"{session['recipe_description']}. Let me know if you have any questions!")
 
+        if session['recipe_generated']:
+            recipe_agent = RecipeAssistant(session['user_profile'], session['recipe_description'])
+            if user_input.lower() in ['exit', 'quit']:
+                return render_template('index.html', bot_response="Goodbye!")
+            response = recipe_agent.generate(user_input)
+            return jsonify(response)
+        
+        if not session['ready_for_agent']:
+            session['ready_for_agent'] = True
+            return jsonify(f"Let me know if you have any questions!")
+        # Handle general questions
+        if not session['recipe_generated']:
+            general_assistant = GeneralAssistant(session['user_profile'])
+            if user_input.lower() in ['exit', 'quit']:
+                return jsonify("Goodbye!")
+            response = general_assistant.generate(user_input)
+            return jsonify(response)
 
-if __name__ == "__main__":
+    return render_template('index.html')
+
+if __name__ == '__main__':
     app.run(debug=True)
