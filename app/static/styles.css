@@ -1,1 +1,69 @@
+/* General Body Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Chatbox Styles */
+textarea#chatbox {
+    width: 80%;
+    height: 300px;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    resize: none;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+    background-color: #fff;
+}
+
+/* Input Field Styles */
+input#userInput {
+    width: 68%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 2px solid #0056b3;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
+}
+
+/* Button Styles */
+button#sendButton {
+    width: 10%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-left: 2%;
+    border: none;
+    border-radius: 8px;
+    background-color: #0056b3;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button#sendButton:hover {
+    background-color: #004494;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    textarea#chatbox, input#userInput, button#sendButton {
+        width: 90%;
+    }
+
+    input#userInput, button#sendButton {
+        width: calc(50% - 4px);
+    }
+}
 
