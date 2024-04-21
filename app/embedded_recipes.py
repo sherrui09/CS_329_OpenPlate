@@ -40,7 +40,7 @@ def convert_list_to_csv(data_list: list, file_path: str):
 recipe_count = 35500
 random_selection = False
 
-ALL_RECIPES = pd.read_csv('all_recipes_scraped.csv') # make path name your own.
+ALL_RECIPES = pd.read_csv('C:/Users/cheem/Documents/GitHub/CS_329_OpenPlate/app/dat/all_recipes_scraped.csv') # make path name your own.
 SAMPLE_RECIPES = select_recipes(ALL_RECIPES, recipe_count, random_selection)
 
 def main():

@@ -481,7 +481,7 @@ def get_recipe(calories_per_meal, taste_profile):
     n_recipes = 1
     dietary_restriction = ''
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = 'C:/Users/sherry/open_plate/app/embedded_recipes.csv'
+    file_path = 'C:/Users/cheem/Documents/GitHub/CS_329_OpenPlate/app/dat/embedded_recipes.csv'
 
     with open(file_path, 'r', newline='', encoding='latin1') as csvfile:
         reader = csv.reader(csvfile)
