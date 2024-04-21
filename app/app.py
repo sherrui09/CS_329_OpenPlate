@@ -559,7 +559,7 @@ def index():
     if request.method == 'POST':
         data = request.get_json()  
         user_input = data['message'].strip()
-        
+        print(user_input)
         current_key = session['current_question_key']
         
         if current_key is not None:
@@ -580,7 +580,9 @@ def index():
                     chat_message = f"Your profile has been created!\nLet me know if you'd like to update your profile or jump into generating your recipe!"
                     popup_message = f"Your profile:\n{session['user_profile']}"
                     # TODO
-                    return jsonify_popup(chat_message,popup_message )
+                    return jsonify_chat(chat_message)
+
+                    # return jsonify_popup(chat_message,popup_message )
             else:
                 print(assistant.questions[current_key])
                 return jsonify_chat(f"Invalid response for {current_key}. Please try again.")

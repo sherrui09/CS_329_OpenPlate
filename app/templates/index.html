@@ -4,8 +4,17 @@
     <meta charset="UTF-8">
     <title>Meal Planner Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Google Fonts Link For Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+
 </head>
 <body>
+    <header>
+        <h1>Project Openplate</h1>
+    </header>
+
     <!-- Welcome Modal -->
     <div id="welcomeModal" class="modal">
         <div class="modal-content">
@@ -35,14 +44,20 @@
     <!-- API Key Button -->
     <button id="apiButton" class="api-key-button pulse">🔒</button>
 
-    <div id="chatInterface">
-        <textarea id="chatbox" rows="10" cols="50" readonly>{{ bot_response }}</textarea>
-        <div>
-            <input type="text" id="userInput">
-            <button id="sendButton">➣</button>
+    <div class="chatbot">
+        <ul class="chatbox">
+            <li class="chat incoming">
+                <span class="material-symbols-outlined"> rice_bowl </span>
+                <div id="botbox" class="bot-message" readonly> {{ bot_response }} </div>
+            </li>         
+        </ul>        
+        
+        <div class="chat-input">
+            <textarea id="userInput" placeholder="Enter a message..." spellcheck="false" required></textarea>
+            <span id="sendButton" class="material-symbols-outlined">send</span>
         </div>
     </div>
     
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script src="{{ url_for('static', filename='../static/app.js') }}"></script>
 </body>
 </html>

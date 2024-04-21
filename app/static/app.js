@@ -1,12 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("IM IN")
     const sendButton = document.getElementById('sendButton');
     const inputBox = document.getElementById('userInput');
-    const chatBox = document.getElementById('chatbox');
+    const chatBox = document.getElementById('botbox'); // This is going to display Our Model's OUTPUT
+    const userBox = document.getElementById('userbox'); // This is going to display Our User's  INPUT
     const apiKeyModal = document.getElementById('apiKeyModal');
     const welcomeModal = document.getElementById('welcomeModal');
     const apiKeyInput = document.getElementById('apiKeyInput');
     const apiKeySubmit = document.getElementById('apiKeySubmit');
     const apiButton = document.getElementById('apiButton');
+
     const closeButtons = document.querySelectorAll('.close');
 
     // Show the welcome modal on load
@@ -69,15 +72,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function sendMessage() {
         const userMessage = inputBox.value.trim();
+        console.log(userMessage)
         const apiKey = localStorage.getItem('apiKey');
         if (!userMessage) {
             alert("Please type a message.");
             return;
         }
 
-        chatBox.value += "You: " + userMessage + "\n";
-        inputBox.value = "";  // Clear input box
+        let riceBowlSpan = document.createElement('span'); // make a ricebowl icon for the BOT
+        let userIconSpan = document.createElement('span')  // make a user icon for USER
+        riceBowlSpan.className = 'material-symbols-outlined';
+        userIconSpan.className = 'material-symbols-outlined';
+        riceBowlSpan.textContent = 'rice_bowl';
+        userIconSpan.textContent = 'person';
 
+
+        // REASON FOR HTML IN JS FILE ---> Need to dynamically update chat. Cannot dynamically update in HTML (to my limited knowledge)
+        let userBoxDiv = document.createElement('div')   // make new div
+        userBoxDiv.className = 'user-message';
+        userBoxDiv.textContent = `You: ${userMessage}`; // Use <br> for newline
+
+        const userBoxLi = document.createElement('li');
+        userBoxLi.className = 'chat incoming';
+        userBoxLi.appendChild(userIconSpan); // for user icon
+        userBoxLi.appendChild(userBoxDiv);
+        
+
+        let chatBox = document.querySelector('.chatbox') // make a NEW chatbox obj for DISPLAY
+        chatBox.appendChild(userBoxLi)
+        
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // chatBox.value += "You: " + userMessage + "\n";
+        // userBox.value += "You: " + userMessage + "\n";
+
+        inputBox.value = "";  // Clear input box
         if (!apiKey) {
             chatBox.value += "Assistant: Please enter an API key to proceed.\n";
             apiKeyModal.style.display = "block";
@@ -95,19 +124,49 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
+            let botBoxDiv = document.createElement('div')   // make new div
+            botBoxDiv.className = 'bot-message';
+            botBoxDiv.textContent = `Assistant: \n${data.message}`;
+            console.log(data.message)
+
+            const botBoxLi = document.createElement('li');
+            botBoxLi.className = 'chat incoming';
+            botBoxLi.appendChild(riceBowlSpan); // this is where ricebowl comes in
+            botBoxLi.appendChild(botBoxDiv);
+            
             if (data.type === "chat") {
-                chatBox.value += "Assistant: " + data.message + "\n";
+                let chatBox = document.querySelector('.chatbox') // make a NEW chatbox obj for DISPLAY
+                chatBox.appendChild(botBoxLi)
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                // chatBox.innerHTML += "Assistant: " + data.message + "\n";
+                // chatBox.value += "Assistant: " + data.message + "\n";
+
             } else if (data.type === "popup") {
                 displayPopup(data.message);
             } else if (data.type === "both") {
-                // need to check which popup it's for
-                chatBox.value += "Assistant: " + data.chat_message + "\n";
+                
+                let chatBox = document.querySelector('.chatbox') // make a NEW chatbox obj for DISPLAY
+                chatBox.appendChild(botBoxLi)
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                // chatBox.innerHTML += "Assistant: " + data.chat_message + "\n";
+                // chatBox.value += "Assistant: " + data.chat_message + "\n";
+
                 displayPopup(data.popup_message);
             }
         })
         .catch((error) => {
             console.error('Error:', error);
-            chatBox.value += "Assistant: I encountered an error. Please try again.\n";
+            let botBoxDiv = document.createElement('div')   // make new div
+            botBoxDiv.className = 'bot-message';
+            botBoxDiv.textContent = "Assistant\n: I encountered an error. Please try again.\n";
+            let chatBox = document.querySelector('.chatbox') // make a NEW chatbox obj for DISPLAY
+            chatBox.appendChild(botBoxDiv)
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // chatBox.innerHTML += "Assistant: I encountered an error. Please try again.\n";
+            // chatBox.value += "Assistant: I encountered an error. Please try again.\n";
         });
     }
 
