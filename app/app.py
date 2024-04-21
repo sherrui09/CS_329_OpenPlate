@@ -12,7 +12,7 @@ from embedded_recipes import SAMPLE_RECIPES
 app = Flask(__name__)
 app.secret_key = 'your_very_secret_key'
 
-api_key = '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'
+api_key = ''
 client = OpenAI(
     api_key=api_key,
 )
