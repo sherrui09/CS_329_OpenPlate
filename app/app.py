@@ -481,7 +481,7 @@ def get_recipe(calories_per_meal, taste_profile):
     n_recipes = 1
     dietary_restriction = ''
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = '/Users/dylanethan/Desktop/CS_329_OpenPlate/app/embedded_recipes.py'
+    file_path = '/Users/dylanethan/Desktop/CS_329_OpenPlate/app/dat/embedded_recipes.csv'
 
     with open(file_path, 'r', newline='', encoding='latin1') as csvfile:
         reader = csv.reader(csvfile)
@@ -561,6 +561,7 @@ def index():
         user_input = data['message'].strip()
         print(user_input)
         current_key = session['current_question_key']
+        int_intent = 2
         
         if current_key is not None:
             valid_response, processed_response = assistant.validate_and_process_response(current_key, user_input)
@@ -617,7 +618,8 @@ def index():
                 chat_message = f"Your profile has been Updated!\nYour recommended daily calories is {session['calories']}.\nLet's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!"
                 # TODO
                 popup_message = f"Your updated profile:\n{update_agent.user_profile}"
-                return jsonify_popup(chat_message,popup_message)
+                return jsonify_chat(chat_message)
+                # return jsonify_popup(chat_message,popup_message)
                 
         if not session['calories_generated'] and (int_intent == 1 or int_intent == 2):
             # Calculate calories and get recipe
