@@ -34,6 +34,7 @@ goals = {
     5: "Other"
 }
 
+
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):
@@ -493,6 +494,20 @@ def get_recipe(calories_per_meal, taste_profile):
 
     return return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes, RECIPE_KEYWORDS)
 
+def jsonify_chat(message):
+    """Generate a JSON response for chat messages."""
+    return jsonify({
+        "type": "chat",
+        "message": message
+    })
+
+def jsonify_popup(chat_message, popup_message):
+    """Generate a JSON response for both popup notifications and chat messages."""
+    return jsonify({
+        "type": "both",
+        "chat_message": chat_message,
+        "popup_message": popup_message
+    })
 assistant = HealthProfileAssistant()
 update_agent = None
 general_assistant = None
@@ -558,14 +573,16 @@ def index():
                 if remaining_keys:
                     session['current_question_key'] = remaining_keys[0]
                     print(session['current_question_key'])
-                    return jsonify(f"{assistant.questions[session['current_question_key']]}")
+                    return jsonify_chat(f"{assistant.questions[session['current_question_key']]}")
                 else:
                     # All questions answered
                     session['current_question_key'] = None
-                    return jsonify(f"Thank you for providing your information. Here's your profile: {session['user_profile']}.\nLet me know if you'd like to update your profile or jump into generating your recipe!")
+                    chat_message = f"Your profile has been created!\nLet me know if you'd like to update your profile or jump into generating your recipe!"
+                    popup_message = f"Your profile:\n{session['user_profile']}"
+                    return jsonify_popup(chat_message,popup_message )
             else:
                 print(assistant.questions[current_key])
-                return jsonify(f"Invalid response for {current_key}. Please try again.")
+                return jsonify_chat(f"Invalid response for {current_key}. Please try again.")
         
         if not session['profile_updated']:
             update_agent = UpdateAssistant(session['user_profile'])
@@ -573,7 +590,7 @@ def index():
             print(int_intent)                 
             if int_intent == 1 and not session['update_profile']:
                 session['update_profile'] = True
-                return jsonify("What are the changes to your health profile?")
+                return jsonify_chat("What are the changes to your health profile?")
             
             if session['update_profile'] and not session['calories_generated']:
                 fields_to_update = update_agent.extract_fields_to_update(update_agent.identify_fields_to_update(user_input))
@@ -584,7 +601,7 @@ def index():
                     prompt = f"From the user's response about their change in health profile '{user_input}', do we have specific information to update their {field_name}? Simply say yes if we do, otherwise just say No"
                     response = generate_update(prompt)
                     if "no" in response.lower():
-                        return jsonify(f"Please specify the updates for {field_name}")
+                        return jsonify_chat(f"Please specify the updates for {field_name}")
                     else:
                         update_agent.user_profile[field_name] = update_agent.process_updates(user_input, field_name)
                 session['user_profile'] = update_agent.user_profile
@@ -594,15 +611,17 @@ def index():
                 if session["calories"] < 1200:
                     session["calories"] = 1200
                 session['calories_generated'] = True
-                return jsonify(f"Thank you for providing the information.\nHere's your new profile: {update_agent.user_profile}. Your recommended daily calories is {session['calories']}. Let's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
-
+                chat_message = f"Your profile has been Updated!\nYour recommended daily calories is {session['calories']}.\nLet's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!"
+                popup_message = f"Your updated profile:\n{update_agent.user_profile}"
+                return jsonify_popup(chat_message,popup_message)
+                
         if not session['calories_generated'] and (int_intent == 1 or int_intent == 2):
             # Calculate calories and get recipe
             session["calories"] = update_agent.calculate_calories()
             print(session["calories"])
             if session["calories"] < 1200: session["calories"] = 1200
             session['calories_generated'] = True
-            return jsonify(f"Your recommended daily calories is {session['calories']}.\nLet's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
+            return jsonify_chat(f"Your recommended daily calories is {session['calories']}.\nLet's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
         # Handle recipe preferences
         if not session['recipe_generated']:
             prompt = f"Given the user's preferences described as: {user_input}, summarize these preferences into a concise statement suitable for NLP processing."
@@ -613,30 +632,30 @@ def index():
             valid_recipe, session['recipe_description'] = validate_recipe(recipe, dietary_restriction, user_preference)
             if valid_recipe:
                 session['recipe_generated'] = True
-                return jsonify(f"{session['recipe_description']}. Let me know if you have any questions!")
+                return jsonify_chat(f"{session['recipe_description']}. Let me know if you have any questions!")
             else:
                 prompt = f"Given the user profile {session['user_profile']}, and their preference for meals {user_preference}, generate a recipe for them that is around {session['calories']} calories"
                 session['recipe_description'] = generate_recipe(prompt)
                 session['recipe_generated'] = True
-                return jsonify(f"{session['recipe_description']}.\nLet me know if you have any questions!")
+                return jsonify_chat(f"{session['recipe_description']}.\nLet me know if you have any questions!")
 
         if session['recipe_generated']:
             recipe_agent = RecipeAssistant(session['user_profile'], session['recipe_description'])
             if user_input.lower() in ['exit', 'quit']:
-                return jsonify("Goodbye!")
+                return jsonify_chat("Goodbye!")
             response = recipe_agent.generate(user_input)
-            return jsonify(response)
+            return jsonify_chat(response)
         
         if not session['ready_for_agent']:
             session['ready_for_agent'] = True
-            return jsonify(f"Let me know if you have any questions!")
+            return jsonify_chat(f"Let me know if you have any questions!")
         # Handle general questions
         if not session['recipe_generated']:
             general_assistant = GeneralAssistant(session['user_profile'])
             if user_input.lower() in ['exit', 'quit']:
-                return jsonify("Goodbye!")
+                return jsonify_chat("Goodbye!")
             response = general_assistant.generate(user_input)
-            return jsonify(response)
+            return jsonify_chat(response)
 
     return render_template('index.html')
 
