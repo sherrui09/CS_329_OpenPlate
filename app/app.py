@@ -579,6 +579,7 @@ def index():
                     session['current_question_key'] = None
                     chat_message = f"Your profile has been created!\nLet me know if you'd like to update your profile or jump into generating your recipe!"
                     popup_message = f"Your profile:\n{session['user_profile']}"
+                    # TODO
                     return jsonify_popup(chat_message,popup_message )
             else:
                 print(assistant.questions[current_key])
@@ -612,6 +613,7 @@ def index():
                     session["calories"] = 1200
                 session['calories_generated'] = True
                 chat_message = f"Your profile has been Updated!\nYour recommended daily calories is {session['calories']}.\nLet's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!"
+                # TODO
                 popup_message = f"Your updated profile:\n{update_agent.user_profile}"
                 return jsonify_popup(chat_message,popup_message)
                 
@@ -632,11 +634,14 @@ def index():
             valid_recipe, session['recipe_description'] = validate_recipe(recipe, dietary_restriction, user_preference)
             if valid_recipe:
                 session['recipe_generated'] = True
+                # TODO
                 return jsonify_chat(f"{session['recipe_description']}. Let me know if you have any questions!")
             else:
                 prompt = f"Given the user profile {session['user_profile']}, and their preference for meals {user_preference}, generate a recipe for them that is around {session['calories']} calories"
                 session['recipe_description'] = generate_recipe(prompt)
                 session['recipe_generated'] = True
+                # TODO
+                # jsonify_popup(chat_Message, popup_message)
                 return jsonify_chat(f"{session['recipe_description']}.\nLet me know if you have any questions!")
 
         if session['recipe_generated']:

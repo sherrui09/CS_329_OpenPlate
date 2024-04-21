@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (data.type === "popup") {
                 displayPopup(data.message);
             } else if (data.type === "both") {
+                // need to check which popup it's for
                 chatBox.value += "Assistant: " + data.chat_message + "\n";
                 displayPopup(data.popup_message);
             }
