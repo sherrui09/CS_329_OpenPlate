@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const apiKeyInput = document.getElementById('apiKeyInput');
     const apiKeySubmit = document.getElementById('apiKeySubmit');
     const apiButton = document.getElementById('apiButton');
+    const userProfile = document.getElementById('userProfile')
+    if (userProfile) {
+        userProfile.addEventListener("click", showUserProfile);
+    }
 
     const closeButtons = document.querySelectorAll('.close');
 
@@ -181,5 +185,41 @@ document.addEventListener('DOMContentLoaded', function() {
         if (modal) {
             modal.style.display = 'none';
         }
+    }
+
+
+    function showUserProfile() {
+        const userProfileModal = document.getElementById('userProfileModal');
+        fetch('/user_profile', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Populate modal with user profile data
+            const userProfileContent = document.getElementById('userProfileContent');
+            userProfileContent.innerHTML = ''; // Clear previous content
+            for (const [key, value] of Object.entries(data)) {
+                const row = document.createElement('div');
+                row.classList.add('row');
+                const keyElement = document.createElement('div');
+                keyElement.classList.add('key');
+                keyElement.textContent = key.charAt(0).toUpperCase() + key.slice(1) + ':';
+                const valueElement = document.createElement('div');
+                valueElement.classList.add('value');
+                valueElement.textContent = value !== null ? value : 'Not provided';
+                row.appendChild(keyElement);
+                row.appendChild(valueElement);
+                userProfileContent.appendChild(keyElement);
+                userProfileContent.appendChild(valueElement);
+            }
+            // Show user profile modal
+            userProfileModal.style.display = 'block';
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
     }
 });

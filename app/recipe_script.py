@@ -63,7 +63,7 @@ def main():
     dietary_restriction = ""
     n_recipes = 5
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = 'C:/Users/cheem/Documents/GitHub/CS_329_OpenPlate/app/dat/embedded_recipes.csv'
+    file_path = '/Users/dylanethan/Desktop/CS_329_OpenPlate/app/dat/embedded_recipes.csv'
 
     start = time.time()
     with open(file_path, 'r', newline='') as csvfile:

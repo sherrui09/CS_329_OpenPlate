@@ -26,6 +26,8 @@ header {
     color: #fff;
     text-align: center;
     padding: 20px 0;
+    display: flex;
+    justify-content: space-around;
 }
 
 * { /* set all elements to have these styles */
@@ -107,17 +109,33 @@ header {
 
 /* API Key Button Styles */
 .api-key-button {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    background-color: #0056b3;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border:none;
+  background-color: #88AB8E;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
 }
+.api-key-button:hover {
+  background-color: #4f8057;
+}
+
+/* User Profile Button Styles */
+.user-profile-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #88AB8E;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  
+}
+.user-profile-button:hover {
+  background-color: #4f8057;
+}
+
 
 .pulse {
     animation: pulse 2s infinite;
@@ -251,54 +269,6 @@ header {
       margin: 0;
   }
 
-/* textarea#chatbox {
-    width: 80%;
-    height: 300px;
-    border: none;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    resize: none;
-    font-size: 16px;
-    line-height: 1.5;
-    color: #333;
-    background-color: #fff;
-}
-*/
-
-/* Input Field Styles */
-/*
-input#userInput {
-    width: 68%;
-    padding: 10px;
-    margin-top: 10px;
-    border: 2px solid #0056b3;
-    border-radius: 8px;
-    font-size: 16px;
-    color: #333;
-    background-color: #fff;
-}
-*/
-
-/* Button Styles */
-/*
-button#sendButton {
-    width: 10%;
-    padding: 10px;
-    margin-top: 10px;
-    margin-left: 2%;
-    border: none;
-    border-radius: 8px;
-    background-color: #0056b3;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-button#sendButton:hover {
-    background-color: #004494;
-} */
 
 /* Responsive Design */
 @media (max-width: 600px) {

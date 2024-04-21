@@ -481,7 +481,7 @@ def get_recipe(calories_per_meal, taste_profile):
     n_recipes = 1
     dietary_restriction = ''
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = 'C:/Users/sherry/open_plate/app/embedded_recipes.csv'
+    file_path = '/Users/dylanethan/Desktop/CS_329_OpenPlate/app/embedded_recipes.py'
 
     with open(file_path, 'r', newline='', encoding='latin1') as csvfile:
         reader = csv.reader(csvfile)
@@ -582,7 +582,7 @@ def index():
                     # TODO
                     return jsonify_chat(chat_message)
 
-                    # return jsonify_popup(chat_message,popup_message )
+                    # return jsonify_popup(chat_message,popup_message 
             else:
                 print(assistant.questions[current_key])
                 return jsonify_chat(f"Invalid response for {current_key}. Please try again.")
@@ -667,6 +667,18 @@ def index():
             return jsonify_chat(response)
 
     return render_template('index.html')
+
+# Get user profile information
+@app.route('/user_profile', methods=['GET'])
+def get_user_profile():
+    user_profile = session.get('user_profile')
+    if user_profile:
+        return jsonify(user_profile), 200
+    else:
+        return jsonify({'error': 'User profile not found'}), 404
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
