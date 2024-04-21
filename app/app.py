@@ -12,10 +12,8 @@ from embedded_recipes import SAMPLE_RECIPES
 app = Flask(__name__)
 app.secret_key = 'your_very_secret_key'
 
-api_key = ''
-client = OpenAI(
-    api_key=api_key,
-)
+
+
 dietary_restrictions = {
     1: "None",
     2: "Keto",
@@ -35,6 +33,14 @@ goals = {
     4: "Maintenance",
     5: "Other"
 }
+
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
 
 def _convert_weight_to_kg(response):
         lbs_kg_pattern = re.compile(r"(\d+)\s*(kg|lb(s)?)?", re.IGNORECASE)
@@ -62,7 +68,7 @@ def _convert_height_to_cm(response):
 
 def generate(prompt):
     try:
-        openai.api_key = api_key
+        client = get_openai_client()
         completion = client.chat.completions.create(
             model="gpt-4",
             messages=[
@@ -83,7 +89,7 @@ def generate(prompt):
 
 def generate_update(prompt):
     try:
-        openai.api_key = api_key
+        client = get_openai_client()
         completion = client.chat.completions.create(
             model="gpt-4",
             messages=[
@@ -104,7 +110,7 @@ def generate_update(prompt):
 # Specializing Agents
 def generate_calorie(prompt):
     try:
-        openai.api_key = api_key
+        client = get_openai_client()
         completion = client.chat.completions.create(
             model="gpt-4",
             messages=[
@@ -126,7 +132,7 @@ def generate_calorie(prompt):
 
 def generate_recipe(prompt):
     try:
-        openai.api_key = api_key
+        client = get_openai_client()
         completion = client.chat.completions.create(
             model="gpt-4",
             messages=[
@@ -144,7 +150,7 @@ def generate_recipe(prompt):
     except Exception as e:
         return str(e)
 
-class HealthProfileAssistant:
+class HealthProfileAssistant(metaclass=Singleton):
     def __init__(self):
         self.user_profile = {
             "height": None,
@@ -247,7 +253,7 @@ def summarize_updates(specified_update, user_input, field_name):
         prompt = f"The user responded {user_input} to the question {specified_update} about their new {field_name}, please summarize what changes there were to their {field_name}"
         return generate_update(prompt)
 
-class UpdateAssistant:
+class UpdateAssistant(metaclass=Singleton):
     def __init__(self, user_profile):
             self.user_profile = user_profile
             self.field_names = list(self.user_profile.keys())
@@ -340,16 +346,10 @@ class UpdateAssistant:
 
         return self.extract_cal(string_cal)
 
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
 
 class RecipeAssistant(metaclass=Singleton):
     def __init__(self, user_profile, recipe_description):
-        self.client = client
+        self.client = get_openai_client()
         self.messages = [
             {
                 "role": "system",
@@ -373,7 +373,7 @@ class RecipeAssistant(metaclass=Singleton):
 
 class GeneralAssistant(metaclass=Singleton):
     def __init__(self, user_profile):
-        self.client = client
+        self.client = get_openai_client()
         self.messages = [
             {
                 "role": "system",
@@ -498,22 +498,49 @@ update_agent = None
 general_assistant = None
 int_intent = None
 
+def is_api_key_valid(api_key):
+    try:
+        client = openai.Client(api_key=api_key)
+        #client.Engines.list()  # Attempt to list engines as a validation check
+        return True
+    except openai.error.AuthenticationError:
+        return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False
+
+def get_openai_client():
+    api_key = session.get('api_key')
+    if not api_key:
+        raise ValueError("API key is not set.")
+    if not is_api_key_valid(api_key):
+        raise ValueError("Invalid API key.")
+    return openai.Client(api_key=api_key)
+
+@app.route('/set_api_key', methods=['POST'])
+def set_api_key():
+    data = request.get_json()
+    api_key = data.get('apiKey')
+    if is_api_key_valid(api_key):
+        session['api_key'] = api_key
+        session['api_key_submit'] = True
+        return jsonify({'message': 'API Key set successfully'}), 200
+    return jsonify({'error': 'Invalid or No API Key provided'}), 400
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
-        session['profile_updated'] = False
-        session['update_profile'] = False
-        session['calories_generated'] = False
-        session['recipe_generated'] = False
-        session['ready_for_agent'] = False
+        session_keys = ['profile_updated', 'update_profile', 'calories_generated', 
+                        'recipe_generated', 'ready_for_agent', 'api_key_submit']
+        session.update({key: False for key in session_keys})
         session['calories'] = 1600
         welcome_message = "Welcome to the Meal Planner Assistant. I'll ask you a few questions to understand your preferences and needs."
         # Start from the first question
         session['current_question_key'] = next(iter(assistant.questions)) if assistant.questions else None
         session['user_profile'] = {key: None for key in assistant.questions}  # Initialize user profile
-        return render_template('index.html', bot_response=f"{welcome_message} {assistant.questions[session['current_question_key']]}")
+        return render_template('index.html', bot_response=f"Assistant: {welcome_message} {assistant.questions[session['current_question_key']]}")
 
-        
     if request.method == 'POST':
         data = request.get_json()  
         user_input = data['message'].strip()
