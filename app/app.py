@@ -481,7 +481,7 @@ def get_recipe(calories_per_meal, taste_profile):
     n_recipes = 1
     dietary_restriction = ''
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = 'C:/Users/cheem/Documents/GitHub/CS_329_OpenPlate/app/dat/embedded_recipes.csv'
+    file_path = 'C:/Users/sherry/open_plate/app/embedded_recipes.csv'
 
     with open(file_path, 'r', newline='', encoding='latin1') as csvfile:
         reader = csv.reader(csvfile)
@@ -625,9 +625,9 @@ def index():
             print(session["calories"])
             if session["calories"] < 1200: session["calories"] = 1200
             session['calories_generated'] = True
-            return jsonify_chat(f"Your recommended daily calories is {session['calories']}.\nLet's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
+            return jsonify_chat(f"Your recommended daily calories is {session['calories']}\nLet's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
         # Handle recipe preferences
-        if not session['recipe_generated']:
+        if not session['recipe_generated'] and (int_intent == 1 or int_intent == 2):
             prompt = f"Given the user's preferences described as: {user_input}, summarize these preferences into a concise statement suitable for NLP processing."
             meal_calories = int(session["calories"] / 3)
             user_preference = generate_recipe(prompt)
@@ -644,7 +644,7 @@ def index():
                 session['recipe_generated'] = True
                 # TODO
                 # jsonify_popup(chat_Message, popup_message)
-                return jsonify_chat(f"{session['recipe_description']}.\nLet me know if you have any questions!")
+                return jsonify_chat(f"{session['recipe_description']}\nLet me know if you have any questions!")
 
         if session['recipe_generated']:
             recipe_agent = RecipeAssistant(session['user_profile'], session['recipe_description'])
@@ -653,7 +653,9 @@ def index():
             response = recipe_agent.generate(user_input)
             return jsonify_chat(response)
         
-        if not session['ready_for_agent']:
+        
+        ## check logic
+        if not (int_intent == 1 or int_intent == 2):
             session['ready_for_agent'] = True
             return jsonify_chat(f"Let me know if you have any questions!")
         # Handle general questions
