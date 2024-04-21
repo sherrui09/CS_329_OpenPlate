@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Meal Planner Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Welcome Modal -->
+    <div id="welcomeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('welcomeModal')">&times;</span>
+            <p>Welcome to OpenPlate! Click 🔒 to enter your API Key and get started.</p>
+        </div>
+    </div>
+
+    <!-- API Key Modal -->
+    <div id="apiKeyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('apiKeyModal')">&times;</span>
+            <p>Enter your API Key to proceed 🔑 ➩ 🔒</p>
+            <input type="text" id="apiKeyInput" placeholder="Enter your API key here">
+            <button id="apiKeySubmit">Submit</button>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div id="notificationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('notificationModal')">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <!-- API Key Button -->
+    <button id="apiButton" class="api-key-button pulse">🔒</button>
+
+    <div id="chatInterface">
+        <textarea id="chatbox" rows="10" cols="50" readonly>{{ bot_response }}</textarea>
+        <div>
+            <input type="text" id="userInput">
+            <button id="sendButton">➣</button>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
