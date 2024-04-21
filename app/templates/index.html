@@ -2,17 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meal Planner Chatbot</title>
+    <title>Meal Planner Assistant</title>
 </head>
 <body>
-    <div id="chat-container">
-        <div id="messages"></div>
-        <input type="text" id="user-input" placeholder="Type your response..." autocomplete="off">
-        <button onclick="sendMessage()">Send</button>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="static/app.js"></script>
+    <textarea id="chatbox" rows="10" cols="50" readonly>{{ bot_response }}</textarea>
+    <br>
+    <input type="text" id="userInput">
+    <button id="sendButton">Send</button>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
