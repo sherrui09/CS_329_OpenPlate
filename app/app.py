@@ -5,7 +5,7 @@ import re
 
 app = Flask(__name__)
 
-api_key = ''
+api_key = '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'
 client = OpenAI(
     api_key=api_key,
 )

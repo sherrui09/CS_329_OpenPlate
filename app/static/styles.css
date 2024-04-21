@@ -1,1 +1,140 @@
+/* Import Google font - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    justify-content: center;
+    background: #E3F2FD;
+}
+
+header {
+    background-color: #88AB8E;
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* Other Styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+.chatbot {
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  transform: scale(0.8);
+}
+
+.chatbot .chatbox {
+  overflow-y: auto;
+  height: 600px;
+  padding: 30px 40px 100px;
+}
+
+.chatbot :where(.chatbox, textarea)::-webkit-scrollbar {
+  width: 6px;
+}
+.chatbot :where(.chatbox, textarea)::-webkit-scrollbar-track {
+  background: #fff;
+  border-radius: 25px;
+}
+.chatbot :where(.chatbox, textarea)::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 25px;
+}
+.chatbox .chat {
+  display: flex;
+  list-style: none;
+}
+.chatbox .incoming span {
+  width: 32px;
+  height: 32px;
+  color: #fff;
+  cursor: default;
+  text-align: center;
+  line-height: 32px;
+  align-self: flex-end;
+  background: #40A2E3;
+  border-radius: 4px;
+  margin: 0 10px 7px 0;
+}
+
+.chatbot .chat-input {
+  display: flex;
+  gap: 5px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: #fff;
+  padding: 3px 20px;
+  border-top: 1px solid #ddd;
+}
+.chat-input textarea {
+  height: 55px;
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  max-height: 180px;
+  padding: 15px 15px 15px 0;
+  font-size: 0.95rem;
+}
+.chat-input span {
+  align-self: flex-end;
+  color: #40A2E3;
+  cursor: pointer;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  visibility: hidden;
+  font-size: 1.35rem;
+}
+.chat-input textarea:valid ~ span {
+    visibility: visible;
+  }
+
+  /* Style for user messages */
+.user-message {
+    background-color: #8db7d6; /* Light blue background */
+    color: #fff; /* Dark text color */
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin: 5px 0;
+}
+
+/* Style for bot messages */
+.bot-message {
+    background-color: #f0f0f0; /* Light gray background */
+    color: #333; /* Dark text color */
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin: 5px 0;
+}
+
+/* Style for error messages */
+.error-message {
+    background-color: #ffcccc; /* Light red background */
+    color: #333; /* Dark text color */
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin: 5px 0;
+}
+
+.chatbox #messages {
+    width: calc(100% - 5%); /* Adjust as needed to leave space for padding */
+    word-wrap: break-word; /* Wrap long words to prevent overflow */
+  }
+
+  .chatbox .messages {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}

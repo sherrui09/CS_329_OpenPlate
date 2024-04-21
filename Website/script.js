@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const chatbox = document.querySelector(".chatbox");
+    
     const chatInput = document.querySelector(".chat-input textarea");
     const sendChatBtn = document.querySelector(".chat-input span");
 
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const API_URL = "https://api.openai.com/v1/chat/completions";
 
         // INSERT API KEY HERE
-        const API_KEY = '' 
+        const API_KEY = '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' 
 
         const messageElement = chatElement.querySelector("p");
 
@@ -33,7 +33,10 @@ document.addEventListener("DOMContentLoaded", function() {
             },
             body: JSON.stringify({
                 model: "gpt-3.5-turbo",
-                messages: [{role: "user", content: userMessage}],
+                messages: [
+                    { role: "system", content: "You are an intelligent meal planner assistant. Your primary task is to gather information about the user (including weight, height, goal) and to understand user queries related to meal planning and provide helpful responses. This includes recognizing the user's intent (e.g., seeking a recipe, needing a shopping list, asking for nutritional advice) and identifying specific details (slots) such as dietary preferences, meal types, preferred cuisines, and ingredients. You should also consider users' dietary restrictions and nutritional goals when providing recommendations." },
+                    {role: "user", content: userMessage}
+                ],
             })
         }
 
@@ -74,8 +77,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     chatInput.addEventListener("keydown", (e) => {
-        // If Enter key is pressed without Shift key and the window 
-        // width is greater than 800px, handle the chat
+        // If Enter key is pressed without Shift key and handle the chat
         if(e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             handleChat();

@@ -1,3 +1,5 @@
+const chatbox = document.querySelector(".chatbox");
+
 $(document).ready(function() {
     $('#user-input').keypress(function(e) {
         if (e.which == 13) {  // Enter key pressed
@@ -11,9 +13,15 @@ $(document).ready(function() {
 
 function startChat() {
     $.getJSON('/start', function(data) {
-        $('#messages').append(`<div>Bot: ${data.message}</div>`);
-        $('#messages').append(`<div>Bot: ${data.question}</div>`);
+        // Append bot messages with a specific class
+        appendBotMessage(data.message);
+        appendBotMessage(data.question);
     });
+}
+
+function appendBotMessage(message) {
+    $('#messages').append(`<div class="bot-message">${message}</div>`);
+    scrollToBottom();
 }
 
 function sendMessage() {
@@ -21,7 +29,9 @@ function sendMessage() {
     $('#user-input').val(''); // Clear input field
     if (!userInput.trim()) return; // Do nothing if the input is only spaces
 
-    $('#messages').append(`<div>User: ${userInput}</div>`); // Display user input in chat
+    // Append user message with a specific class
+    $('#messages').append(`<div class="user-message">${userInput}</div>`);
+    scrollToBottom();
 
     $.ajax({
         url: '/message',
@@ -29,15 +39,15 @@ function sendMessage() {
         contentType: 'application/json',
         data: JSON.stringify({message: userInput}),
         success: function(data) {
-            $('#messages').append(`<div>Bot: ${data.message}</div>`);
+            // Append bot message with a specific class
+            appendBotMessage(data.message);
             if (data.message.includes("Here's your profile")) {
-                $('#user-input').prop('disabled', true); // Optionally disable input if conversation ends
+                // $('#user-input').prop('disabled', true); // Optionally disable input if conversation ends
             }
-            scrollToBottom(); // Scroll chat to the latest message
         },
         error: function() {
-            $('#messages').append(`<div>Bot: There was an error processing your message. Please try again.</div>`);
-            scrollToBottom(); // Scroll chat to the latest message
+            // Append error message with a specific class
+            $('#messages').append(`<div class="error-message">There was an error processing your message. Please try again.</div>`);
         }
     });
 }
