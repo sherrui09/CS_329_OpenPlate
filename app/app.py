@@ -597,7 +597,7 @@ def index():
         if session['recipe_generated']:
             recipe_agent = RecipeAssistant(session['user_profile'], session['recipe_description'])
             if user_input.lower() in ['exit', 'quit']:
-                return render_template('index.html', bot_response="Goodbye!")
+                return jsonify("Goodbye!")
             response = recipe_agent.generate(user_input)
             return jsonify(response)
         
