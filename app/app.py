@@ -187,10 +187,10 @@ class HealthProfileAssistant(metaclass=Singleton):
             if topic in ["height", "weight"]:
                 prompt = f"From this response '{response}' for {topic}, can we tell what the user's {topic} is and the unit? Please answer Yes or No, and if Yes, provide the user's {topic}. Say No for invalid/illogical answers or missing units."
             else:
-                prompt = f"From this response '{response}', can we tell what the user's {topic} is? Please answer Yes or No, and if Yes, provide the user's {topic}."
+                prompt = f"From this response '{response}', can we tell what the user's {topic} is? Please try to categorize and answer Yes or No, and if Yes, provide the user's {topic}."
 
             ai_response = generate(prompt)
-            #print(ai_response)
+            print(ai_response)
 
             if "no" in ai_response.lower().split() and topic != "dietary_restriction":
                 prompt = (
@@ -571,11 +571,11 @@ def index():
             update_agent = UpdateAssistant(session['user_profile'])
             int_intent = update_agent.check_for_update_intent(user_input) 
             print(int_intent)                 
-            if int_intent == 1:
+            if int_intent == 1 and not session['update_profile']:
                 session['update_profile'] = True
                 return jsonify("What are the changes to your health profile?")
             
-            if session['update_profile']:
+            if session['update_profile'] and not session['calories_generated']:
                 fields_to_update = update_agent.extract_fields_to_update(update_agent.identify_fields_to_update(user_input))
                 for field_index in fields_to_update:
                     if field_index == 0:
@@ -584,10 +584,9 @@ def index():
                     prompt = f"From the user's response about their change in health profile '{user_input}', do we have specific information to update their {field_name}? Simply say yes if we do, otherwise just say No"
                     response = generate_update(prompt)
                     if "no" in response.lower():
-                        ### NEED TO REFINE
-                        return render_template('index.html', bot_response=f"Please specify the update for {field_name}")
+                        return render_template('index.html', bot_response=f"Please specify the updates for {field_name}")
                     else:
-                        update_agent.user_profile[field_name] = update_agent.process_updates(user_input)
+                        update_agent.user_profile[field_name] = update_agent.process_updates(user_input, field_name)
                 session['user_profile'] = update_agent.user_profile
                 session.pop('update_profile', None)
                 session['profile_updated'] = True
@@ -595,7 +594,7 @@ def index():
                 if session["calories"] < 1200:
                     session["calories"] = 1200
                 session['calories_generated'] = True
-                return jsonify(f"Thank you for providing the information. Here's your new profile: {update_agent.user_profile}Your recommended daily calories is {calories}. Let's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
+                return jsonify(f"Thank you for providing the information. Here's your new profile: {update_agent.user_profile}Your recommended daily calories is {session["calories"]}. Let's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
 
         if not session['calories_generated'] and (int_intent == 1 or int_intent == 2):
             # Calculate calories and get recipe
