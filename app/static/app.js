@@ -1,48 +1,46 @@
-$(document).ready(function() {
-    $('#user-input').keypress(function(e) {
-        if (e.which == 13) {  // Enter key pressed
+document.addEventListener('DOMContentLoaded', function() {
+    const sendButton = document.getElementById('sendButton');
+    const inputBox = document.getElementById('userInput');
+    const chatBox = document.getElementById('chatbox');
+
+    sendButton.addEventListener('click', sendMessage);
+    inputBox.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
             sendMessage();
-            e.preventDefault(); // Prevent form submit
         }
     });
 
-    startChat();
+    function sendMessage() {
+        const userMessage = inputBox.value.trim();
+
+        if (!userMessage) {
+            alert("Please type a message.");
+            return;
+        }
+
+        chatBox.value += "You: " + userMessage + "\n";
+        inputBox.value = "";  // clear input box
+
+        fetch('/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({message: userMessage}),
+        })
+        .then(response => {
+            console.log('Response:', response);
+            return response.text(); // Parse response as text
+        })
+        .then(body => {
+            console.log('Response Body:', body); // Log the response body
+            chatBox.value += "Assistant: " + body + "\n"; // Add the response to the chat box
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            chatBox.value += "Assistant: I encountered an error. Please try again.\n";
+        });
+        
+        
+    }
 });
-
-function startChat() {
-    $.getJSON('/start', function(data) {
-        $('#messages').append(`<div>Bot: ${data.message}</div>`);
-        $('#messages').append(`<div>Bot: ${data.question}</div>`);
-    });
-}
-
-function sendMessage() {
-    const userInput = $('#user-input').val();
-    $('#user-input').val(''); // Clear input field
-    if (!userInput.trim()) return; // Do nothing if the input is only spaces
-
-    $('#messages').append(`<div>User: ${userInput}</div>`); // Display user input in chat
-
-    $.ajax({
-        url: '/message',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({message: userInput}),
-        success: function(data) {
-            $('#messages').append(`<div>Bot: ${data.message}</div>`);
-            if (data.message.includes("Here's your profile")) {
-                $('#user-input').prop('disabled', true); // Optionally disable input if conversation ends
-            }
-            scrollToBottom(); // Scroll chat to the latest message
-        },
-        error: function() {
-            $('#messages').append(`<div>Bot: There was an error processing your message. Please try again.</div>`);
-            scrollToBottom(); // Scroll chat to the latest message
-        }
-    });
-}
-
-function scrollToBottom() {
-    var messagesContainer = $('#messages');
-    messagesContainer.scrollTop(messagesContainer.prop("scrollHeight"));
-}
