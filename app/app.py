@@ -535,11 +535,11 @@ def index():
                         'recipe_generated', 'ready_for_agent', 'api_key_submit']
         session.update({key: False for key in session_keys})
         session['calories'] = 1600
-        welcome_message = "Welcome to the Meal Planner Assistant. I'll ask you a few questions to understand your preferences and needs."
+        welcome_message = "Welcome to the OpenPlate Agent. I'll ask you a few questions to understand your preferences and needs."
         # Start from the first question
         session['current_question_key'] = next(iter(assistant.questions)) if assistant.questions else None
         session['user_profile'] = {key: None for key in assistant.questions}  # Initialize user profile
-        return render_template('index.html', bot_response=f"Assistant: {welcome_message} {assistant.questions[session['current_question_key']]}")
+        return render_template('index.html', bot_response=f"Assistant: {welcome_message}\n{assistant.questions[session['current_question_key']]}\n")
 
     if request.method == 'POST':
         data = request.get_json()  
@@ -562,7 +562,7 @@ def index():
                 else:
                     # All questions answered
                     session['current_question_key'] = None
-                    return jsonify(f"Thank you for providing your information. Here's your profile: {session['user_profile']}\n Let me know if you'd like to update your profile or jump into generating your recipe!")
+                    return jsonify(f"Thank you for providing your information. Here's your profile: {session['user_profile']}.\nLet me know if you'd like to update your profile or jump into generating your recipe!")
             else:
                 print(assistant.questions[current_key])
                 return jsonify(f"Invalid response for {current_key}. Please try again.")
@@ -584,7 +584,7 @@ def index():
                     prompt = f"From the user's response about their change in health profile '{user_input}', do we have specific information to update their {field_name}? Simply say yes if we do, otherwise just say No"
                     response = generate_update(prompt)
                     if "no" in response.lower():
-                        return render_template('index.html', bot_response=f"Please specify the updates for {field_name}")
+                        return jsonify(f"Please specify the updates for {field_name}")
                     else:
                         update_agent.user_profile[field_name] = update_agent.process_updates(user_input, field_name)
                 session['user_profile'] = update_agent.user_profile
@@ -594,7 +594,7 @@ def index():
                 if session["calories"] < 1200:
                     session["calories"] = 1200
                 session['calories_generated'] = True
-                return jsonify(f"Thank you for providing the information. Here's your new profile: {update_agent.user_profile}Your recommended daily calories is {session["calories"]}. Let's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
+                return jsonify(f"Thank you for providing the information.\nHere's your new profile: {update_agent.user_profile}. Your recommended daily calories is {session['calories']}. Let's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
 
         if not session['calories_generated'] and (int_intent == 1 or int_intent == 2):
             # Calculate calories and get recipe
@@ -602,7 +602,7 @@ def index():
             print(session["calories"])
             if session["calories"] < 1200: session["calories"] = 1200
             session['calories_generated'] = True
-            return jsonify(f"Your recommended daily calories is {session['calories']}. Let's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
+            return jsonify(f"Your recommended daily calories is {session['calories']}.\nLet's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
         # Handle recipe preferences
         if not session['recipe_generated']:
             prompt = f"Given the user's preferences described as: {user_input}, summarize these preferences into a concise statement suitable for NLP processing."
@@ -618,7 +618,7 @@ def index():
                 prompt = f"Given the user profile {session['user_profile']}, and their preference for meals {user_preference}, generate a recipe for them that is around {session['calories']} calories"
                 session['recipe_description'] = generate_recipe(prompt)
                 session['recipe_generated'] = True
-                return jsonify(f"{session['recipe_description']}. Let me know if you have any questions!")
+                return jsonify(f"{session['recipe_description']}.\nLet me know if you have any questions!")
 
         if session['recipe_generated']:
             recipe_agent = RecipeAssistant(session['user_profile'], session['recipe_description'])
