@@ -1,4 +1,4 @@
-/* General Body Styles */
+
 body {
     font-family: 'Arial', sans-serif;
     background-color: #f4f4f9;
@@ -9,6 +9,107 @@ body {
     align-items: center;
     height: 100vh;
 }
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 2; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity for the backdrop */
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto; /* Adjust the margin as per your design */
+    padding: 20px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Same as the chatbox */
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 400px; /* Match the width of your chatbox or as needed */
+}
+
+/* Style the close button to match your design */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Style the input and submit button to match the chatbox and sendButton */
+#apiKeyInput {
+    width: calc(100% - 20px); /* Full width minus padding */
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    border: 2px solid #0056b3; /* Match the input border from the design */
+    border-radius: 8px;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
+}
+
+#apiKeySubmit {
+    width: 100%;
+    padding: 10px;
+    margin: auto;
+    border: none;
+    border-radius: 8px;
+    background-color: #0056b3; /* Match the sendButton background color */
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#apiKeySubmit:hover {
+    background-color: #004494; /* Same hover effect as sendButton */
+}
+
+
+/* API Key Button Styles */
+.api-key-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #0056b3;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 86, 179, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 86, 179, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 86, 179, 0);
+    }
+}
+
 
 /* Chatbox Styles */
 textarea#chatbox {
@@ -66,4 +167,3 @@ button#sendButton:hover {
         width: calc(50% - 4px);
     }
 }
-
