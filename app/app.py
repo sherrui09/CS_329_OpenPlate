@@ -481,7 +481,7 @@ def get_recipe(calories_per_meal, taste_profile):
     n_recipes = 1
     dietary_restriction = ''
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = 'C:/Users/sherry/open_plate/app/embedded_recipes.csv'
+    file_path = 'C:/Users/cheem/Documents/GitHub/CS_329_OpenPlate/app/dat/embedded_recipes.csv'
 
     with open(file_path, 'r', newline='', encoding='latin1') as csvfile:
         reader = csv.reader(csvfile)
@@ -561,6 +561,7 @@ def index():
         user_input = data['message'].strip()
         print(user_input)
         current_key = session['current_question_key']
+        int_intent = 2 # hardcode then recalculate
         
         if current_key is not None:
             valid_response, processed_response = assistant.validate_and_process_response(current_key, user_input)
@@ -590,7 +591,7 @@ def index():
         if not session['profile_updated']:
             update_agent = UpdateAssistant(session['user_profile'])
             int_intent = update_agent.check_for_update_intent(user_input) 
-            print(int_intent)                 
+            print(f'int_intent: {int_intent}')                 
             if int_intent == 1 and not session['update_profile']:
                 session['update_profile'] = True
                 return jsonify_chat("What are the changes to your health profile?")
@@ -617,9 +618,12 @@ def index():
                 chat_message = f"Your profile has been Updated!\nYour recommended daily calories is {session['calories']}.\nLet's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!"
                 # TODO
                 popup_message = f"Your updated profile:\n{update_agent.user_profile}"
-                return jsonify_popup(chat_message,popup_message)
+                int_intent = 2 # to avoid error...
+                return jsonify_chat(chat_message)
+                # return jsonify_popup(chat_message,popup_message)
                 
         if not session['calories_generated'] and (int_intent == 1 or int_intent == 2):
+            print(f'int_intent: {int_intent}')                 
             # Calculate calories and get recipe
             session["calories"] = update_agent.calculate_calories()
             print(session["calories"])
@@ -628,6 +632,8 @@ def index():
             return jsonify_chat(f"Your recommended daily calories is {session['calories']}\nLet's find your perfect recipe! Please tell me about what you are looking for in a recipe such as any preferences in taste, cook time, budget, or health considerations. Include any other relevant details. This helps me pick the best recipes for you!")
         # Handle recipe preferences
         if not session['recipe_generated'] and (int_intent == 1 or int_intent == 2):
+            print(f'int_intent: {int_intent}')                 
+
             prompt = f"Given the user's preferences described as: {user_input}, summarize these preferences into a concise statement suitable for NLP processing."
             meal_calories = int(session["calories"] / 3)
             user_preference = generate_recipe(prompt)
