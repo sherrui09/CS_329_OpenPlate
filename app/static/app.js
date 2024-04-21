@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners for closing modals
     closeButtons.forEach(button => {
         button.addEventListener('click', function() {
-            button.closest('.modal').style.display = "none";
+            closeModal(button.closest('.modal').id);
         });
     });
 
@@ -27,16 +27,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Close the modal when clicking outside of it
     window.onclick = function(event) {
         if (event.target.className === 'modal') {
-            event.target.style.display = "none";
+            closeModal(event.target.id);
         }
-    }
-    
+    };
+
     apiKeySubmit.addEventListener('click', function() {
         const apiKey = apiKeyInput.value.trim();
         if (!apiKey) {
             alert("Please enter an API Key.");
             return;
         }
+        localStorage.setItem('apiKey', apiKey);  // Store API key in localStorage
         fetch('/set_api_key', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -45,11 +46,11 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.message) {
-                alert(data.message);  // Success
+                alert(data.message);  // Show success message
                 apiKeyModal.style.display = "none";
-                apiButton.classList.remove('pulse');  // Stop pulsating the button
+                apiButton.classList.remove('pulse');
             } else {
-                alert(data.error);  // Error handling
+                alert(data.error);  // Show error message
             }
         })
         .catch(error => {
@@ -57,16 +58,12 @@ document.addEventListener('DOMContentLoaded', function() {
             alert("Failed to set API key due to an error.");
         });
     });
-    
 
-    
-
-    // Sending a message
     sendButton.addEventListener('click', sendMessage);
     inputBox.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
             sendMessage();
-            event.preventDefault(); // Prevent form submit on enter press
+            event.preventDefault();  // Prevent form submit on enter press
         }
     });
 
@@ -79,16 +76,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         chatBox.value += "You: " + userMessage + "\n";
-        inputBox.value = ""; // clear input box
+        inputBox.value = "";  // Clear input box
 
         if (!apiKey) {
             chatBox.value += "Assistant: Please enter an API key to proceed.\n";
             apiKeyModal.style.display = "block";
-            apiButton.classList.add('pulse'); // Start pulsating the button
+            apiButton.classList.add('pulse');
             return;
         }
 
-        // Simulate API call
         fetch('/', {
             method: 'POST',
             headers: {
@@ -97,13 +93,33 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({message: userMessage}),
         })
-        .then(response => response.text()) // Parse response as text
-        .then(body => {
-            chatBox.value += "Assistant: " + body + "\n"; // Add the response to the chat box
+        .then(response => response.json())
+        .then(data => {
+            if (data.type === "chat") {
+                chatBox.value += "Assistant: " + data.message + "\n";
+            } else if (data.type === "popup") {
+                displayPopup(data.message);
+            } else if (data.type === "both") {
+                chatBox.value += "Assistant: " + data.chat_message + "\n";
+                displayPopup(data.popup_message);
+            }
         })
         .catch((error) => {
             console.error('Error:', error);
             chatBox.value += "Assistant: I encountered an error. Please try again.\n";
         });
+    }
+
+    function displayPopup(message) {
+        const notificationModal = document.getElementById('notificationModal');
+        document.getElementById('modalMessage').textContent = message;
+        notificationModal.style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
     }
 });
