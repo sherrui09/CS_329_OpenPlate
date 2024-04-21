@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Meal Planner Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <textarea id="chatbox" rows="10" cols="50" readonly>{{ bot_response }}</textarea>
-    <br>
-    <input type="text" id="userInput">
-    <button id="sendButton">Send</button>
+    <div id="chatInterface">
+        <textarea id="chatbox" rows="10" cols="50" readonly>{{ bot_response }}</textarea>
+        <div>
+            <input type="text" id="userInput">
+            <button id="sendButton">➣</button>
+        </div>
+    </div>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
