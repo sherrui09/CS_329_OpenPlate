@@ -12,8 +12,19 @@
 </head>
 <body>
     <header>
+        <!-- User Profile Button -->
+        <button id="userProfile" class="user-profile-button">👤</button>
         <h1>Project Openplate</h1>
+        <!-- API Key Button -->
+        <button id="apiButton" class="api-key-button pulse">🔒</button>
     </header>
+
+    <div id="userProfileModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('userProfileModal')">&times;</span>
+            <div id="userProfileContent"></div>
+        </div>
+    </div>
 
     <!-- Welcome Modal -->
     <div id="welcomeModal" class="modal">
@@ -41,8 +52,7 @@
         </div>
     </div>
 
-    <!-- API Key Button -->
-    <button id="apiButton" class="api-key-button pulse">🔒</button>
+    
 
     <div class="chatbot">
         <ul class="chatbox">
