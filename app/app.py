@@ -674,5 +674,13 @@ def index():
 
     return render_template('index.html')
 
+@app.route('/user_profile', methods=['GET'])
+def get_user_profile():
+    user_profile = session.get('user_profile')
+    if user_profile:
+        return jsonify(user_profile), 200
+    else:
+        return jsonify({'error': 'User profile not found'}), 404
+
 if __name__ == '__main__':
     app.run(debug=True)
