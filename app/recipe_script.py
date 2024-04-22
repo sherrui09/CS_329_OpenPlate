@@ -5,6 +5,7 @@ import numpy as np # type: ignore
 import time
 from fuzzywuzzy import fuzz # type: ignore
 import csv
+import os
 
 from embedded_recipes import SAMPLE_RECIPES
 
@@ -63,7 +64,9 @@ def main():
     dietary_restriction = ""
     n_recipes = 5
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = '/Users/dylanethan/Desktop/CS_329_OpenPlate/app/dat/embedded_recipes.csv'
+    
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(BASE_DIR, 'dat/embedded_recipes.csv')
 
     start = time.time()
     with open(file_path, 'r', newline='') as csvfile:

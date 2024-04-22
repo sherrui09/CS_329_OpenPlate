@@ -484,7 +484,7 @@ def get_recipe(calories_per_meal, taste_profile):
     n_recipes = 1
     dietary_restriction = ''
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = os.path.join(BASE_DIR, 'embedded_recipes.csv')
+    file_path = os.path.join(BASE_DIR, 'dat/embedded_recipes.csv')
 
     with open(file_path, 'r', newline='', encoding='latin1') as csvfile:
         reader = csv.reader(csvfile)
