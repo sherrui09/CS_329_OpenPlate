@@ -481,7 +481,7 @@ def get_recipe(calories_per_meal, taste_profile):
     n_recipes = 1
     dietary_restriction = ''
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = 'C:/Users/cheem/Documents/GitHub/CS_329_OpenPlate/app/dat/embedded_recipes.csv'
+    file_path = '/Users/dylanethan/Desktop/CS_329_OpenPlate/app/dat/embedded_recipes.csv'
 
     with open(file_path, 'r', newline='', encoding='latin1') as csvfile:
         reader = csv.reader(csvfile)
@@ -554,7 +554,7 @@ def index():
         # Start from the first question
         session['current_question_key'] = next(iter(assistant.questions)) if assistant.questions else None
         session['user_profile'] = {key: None for key in assistant.questions}  # Initialize user profile
-        return render_template('index.html', bot_response=f"Assistant: {welcome_message}\n{assistant.questions[session['current_question_key']]}\n")
+        return render_template('index.html', bot_response=f"{welcome_message}\n{assistant.questions[session['current_question_key']]}\n")
 
     if request.method == 'POST':
         data = request.get_json()  

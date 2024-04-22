@@ -75,11 +75,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function sendMessage() {
+        // Disable input box
+        inputBox.disabled = true;
+
         const userMessage = inputBox.value.trim();
         console.log(userMessage)
         const apiKey = localStorage.getItem('apiKey');
         if (!userMessage) {
             alert("Please type a message.");
+            // Enable input box
+            inputBox.disabled = false;
             return;
         }
 
@@ -94,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // REASON FOR HTML IN JS FILE ---> Need to dynamically update chat. Cannot dynamically update in HTML (to my limited knowledge)
         let userBoxDiv = document.createElement('div')   // make new div
         userBoxDiv.className = 'user-message';
-        userBoxDiv.textContent = `You: ${userMessage}`; // Use <br> for newline
+        userBoxDiv.textContent = `${userMessage}`; // Use <br> for newline
 
         const userBoxLi = document.createElement('li');
         userBoxLi.className = 'chat incoming';
@@ -115,6 +120,8 @@ document.addEventListener('DOMContentLoaded', function() {
             chatBox.value += "Assistant: Please enter an API key to proceed.\n";
             apiKeyModal.style.display = "block";
             apiButton.classList.add('pulse');
+            // Enable input box
+            inputBox.disabled = false;
             return;
         }
 
@@ -130,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             let botBoxDiv = document.createElement('div')   // make new div
             botBoxDiv.className = 'bot-message';
-            botBoxDiv.textContent = `Assistant: \n${data.message}`;
+            botBoxDiv.textContent = `\n${data.message}`;
             console.log(data.message)
 
             const botBoxLi = document.createElement('li');
@@ -159,6 +166,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 displayPopup(data.popup_message);
             }
+
+            // Enable input box
+            inputBox.disabled = false;
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -171,6 +181,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // chatBox.innerHTML += "Assistant: I encountered an error. Please try again.\n";
             // chatBox.value += "Assistant: I encountered an error. Please try again.\n";
+
+            // Enable input box
+            inputBox.disabled = false;
         });
     }
 
