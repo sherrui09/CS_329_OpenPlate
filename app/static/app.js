@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("IM IN")
     const sendButton = document.getElementById('sendButton');
     const inputBox = document.getElementById('userInput');
-    inputBox.disabled = true;
     const chatBox = document.getElementById('botbox'); // This is going to display Our Model's OUTPUT
     const userBox = document.getElementById('userbox'); // This is going to display Our User's  INPUT
     const apiKeyModal = document.getElementById('apiKeyModal');
@@ -10,7 +9,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const apiKeyInput = document.getElementById('apiKeyInput');
     const apiKeySubmit = document.getElementById('apiKeySubmit');
     const apiButton = document.getElementById('apiButton');
-    const userProfile = document.getElementById('userProfile')
+    const userProfile = document.getElementById('userProfile');
+
+    if (localStorage.getItem('apiKey')) { inputBox.disabled = false; } // if key is in localStorage, don't have to input it again.
+    else { inputBox.disabled = true; }
+
     if (userProfile) {
         userProfile.addEventListener("click", showUserProfile);
     }

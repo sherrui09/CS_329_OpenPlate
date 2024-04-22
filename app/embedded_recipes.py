@@ -43,7 +43,7 @@ def convert_list_to_csv(data_list: list, file_path: str):
 recipe_count = 35500
 random_selection = False
 
-file_path = os.path.join(BASE_DIR, 'all_recipes_scraped.csv')
+file_path = os.path.join(BASE_DIR, 'dat/all_recipes_scraped.csv')
 ALL_RECIPES = pd.read_csv(file_path, encoding='iso-8859-1') # make path name your own.
 SAMPLE_RECIPES = select_recipes(ALL_RECIPES, recipe_count, random_selection)
 
