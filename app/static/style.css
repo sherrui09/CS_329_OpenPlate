@@ -82,7 +82,7 @@ header {
     padding: 10px;
     margin-top: 10px;
     margin-bottom: 20px;
-    border: 2px solid #0056b3; /* Match the input border from the design */
+    border: 2px solid #4f8057; 
     border-radius: 8px;
     font-size: 16px;
     color: #333;
@@ -95,7 +95,7 @@ header {
     margin: auto;
     border: none;
     border-radius: 8px;
-    background-color: #0056b3; /* Match the sendButton background color */
+    background-color: #88AB8E;
     color: white;
     font-size: 16px;
     cursor: pointer;
@@ -103,7 +103,7 @@ header {
 }
 
 #apiKeySubmit:hover {
-    background-color: #004494; /* Same hover effect as sendButton */
+    background-color: #4f8057; /* Same hover effect as sendButton */
 }
 
 
