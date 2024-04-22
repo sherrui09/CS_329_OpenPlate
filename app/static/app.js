@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("IM IN")
     const sendButton = document.getElementById('sendButton');
     const inputBox = document.getElementById('userInput');
+    inputBox.disabled = true;
     const chatBox = document.getElementById('botbox'); // This is going to display Our Model's OUTPUT
     const userBox = document.getElementById('userbox'); // This is going to display Our User's  INPUT
     const apiKeyModal = document.getElementById('apiKeyModal');
@@ -56,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(data.message);  // Show success message
                 apiKeyModal.style.display = "none";
                 apiButton.classList.remove('pulse');
+                inputBox.disabled = false;
             } else {
                 alert(data.error);  // Show error message
             }
