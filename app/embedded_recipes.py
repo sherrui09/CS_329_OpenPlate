@@ -1,8 +1,11 @@
+import os
 from keybert import KeyBERT # type: ignore
 import pandas as pd # type: ignore
 from pandas import DataFrame # type: ignore
 import time
 import csv
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def select_recipes(recipes: DataFrame, n: int, random_selection: bool) -> DataFrame:
   if n > len(recipes): raise ValueError("Choose smaller n")
@@ -40,18 +43,23 @@ def convert_list_to_csv(data_list: list, file_path: str):
 recipe_count = 35500
 random_selection = False
 
-ALL_RECIPES = pd.read_csv('/Users/dylanethan/Desktop/CS_329_OpenPlate/app/dat/all_recipes_scraped.csv') # make path name your own.
+file_path = os.path.join(BASE_DIR, 'all_recipes_scraped.csv')
+ALL_RECIPES = pd.read_csv(file_path, encoding='iso-8859-1') # make path name your own.
 SAMPLE_RECIPES = select_recipes(ALL_RECIPES, recipe_count, random_selection)
 
-def main():
-  recipe_keywords = make_recipe_keywords(SAMPLE_RECIPES) # pre-calculate the keywords to make KeyBERT methods faster. GLOBAL
-  convert_list_to_csv(recipe_keywords, 'embedded_recipes.csv')
+# def main():
+#   recipe_keywords = make_recipe_keywords(SAMPLE_RECIPES) # pre-calculate the keywords to make KeyBERT methods faster. GLOBAL
+#   convert_list_to_csv(recipe_keywords, 'C:/Users/sherry/open_plate/app/embedded_recipes.csv')
 
-  # df_recipe_keywords = pd.DataFrame(recipe_keywords)
-  # df_recipe_keywords.to_csv('embedded_recipes.csv', index=False)
+#   # df_recipe_keywords = pd.DataFrame(recipe_keywords)
+#   # df_recipe_keywords.to_csv('embedded_recipes.csv', index=False)
 
-if __name__ == "__main__":
-  main()
+# if __name__ == "__main__":
+#   main()
 
 
+
+
+
+#ALL_RECIPES = pd.read_csv('C:/Users/sherry/open_plate/app/embedded_recipes.csv', encoding='iso-8859-1')  # Adjust encoding if needed
 
