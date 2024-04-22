@@ -14,6 +14,7 @@ app = Flask(__name__)
 app.secret_key = 'your_very_secret_key'
 
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 dietary_restrictions = {
     1: "None",
@@ -266,6 +267,7 @@ class UpdateAssistant(metaclass=Singleton):
           )
           response = generate(prompt)
           int_intent = lambda s: int(re.search(r'\d', s).group(0)) if re.search(r'\d', s) else None
+          print(response)
           return int_intent(response)
 
     def identify_fields_to_update(self, updates):
@@ -408,7 +410,7 @@ def validate_recipe(recipe, dietary_restriction, taste):
         servings = recipe[0]["servings"]
         calories = recipe[0]["calories"]
         recipe_description = f"Recipe name: {name}, Ingredients: {ingredients}, Directions: {directions}, Calories: {calories}, Prep time: {prep}, Cook time: {cook}. URL: {url}"
-        prompt = prompt = f"Given the user's dietary preference of {dietary_restriction} with a taste profile for {taste}, does the following recipe description fit their dietary preference and somewhat match their taste profile? Here's the recipe: {recipe_description}. Return 1 for Yes, 2 for No."
+        prompt = f"Given the user's dietary restriction of {dietary_restriction}, does the following recipe fit? Here's the recipe: {recipe_description}. Return 1 for Yes, 2 for No. Only return no if the recipe is absolutely not a match for their dietary restriction or is very off from their taste profile for: {taste}."
         recipe_check = generate(prompt)
         int_recipe_check = lambda s: int(re.search(r'\d', s).group(0)) if re.search(r'\d', s) else None
         print(int_recipe_check)
@@ -482,7 +484,7 @@ def get_recipe(calories_per_meal, taste_profile):
     n_recipes = 1
     dietary_restriction = ''
     # return_top_recipes(calories_per_meal, taste_profile, dietary_restriction, n_recipes)
-    file_path = '/Users/dylanethan/Desktop/CS_329_OpenPlate/app/dat/embedded_recipes.csv'
+    file_path = os.path.join(BASE_DIR, 'embedded_recipes.csv')
 
     with open(file_path, 'r', newline='', encoding='latin1') as csvfile:
         reader = csv.reader(csvfile)
@@ -662,7 +664,7 @@ def index():
         
         
         ## check logic
-        if not (int_intent == 1 or int_intent == 2):
+        if not (int_intent == 1 or int_intent == 2) and not session['ready_for_agent']:
             session['ready_for_agent'] = True
             return jsonify_chat(f"Let me know if you have any questions!")
         # Handle general questions
@@ -684,5 +686,4 @@ def get_user_profile():
         return jsonify({'error': 'User profile not found'}), 404
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)), debug=False)
-
+    app.run(debug=True)
